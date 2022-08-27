@@ -30,19 +30,35 @@ interface IERC20 {
 
 abstract contract ERC721RoyaltyComposer is ERC721 {
     bool public orcPaused;
-    IORC public orc; // Objective Contracts Filter
+    IORC public orc; // Objective Royalty Composer
 
     uint256 public orcPremium;
     IERC20 private weth;
+
+    struct PremiumData {
+        uint256 latestUpdateTime;
+        uint64 minInterval;
+        uint64 maxIncreasePercent;
+    }
+
+    PremiumData public premiumData;
 
     address public royaltyRecipient;
 
     error NotEnoughWethAllowanceForPremium(uint256 allowance, uint256 required);
 
-    constructor(address orcAddress, address wethAddress) {
+    constructor(
+        address orcAddress,
+        address wethAddress,
+        uint256 premium,
+        uint64 minInterval,
+        uint64 maxIncreasePercent
+    ) {
         orc = IORC(orcAddress);
         weth = IERC20(wethAddress);
         royaltyRecipient = address(this);
+        orcPremium = premium;
+        premiumData = PremiumData(minInterval, maxIncreasePercent, 0);
         if (!orc.isORC()) revert("Not a valid ORC address");
     }
 
@@ -86,7 +102,27 @@ abstract contract ERC721RoyaltyComposer is ERC721 {
     }
 
     function _setPremium(uint256 _premium) internal virtual {
-        orcPremium = _premium;
+        // Only allow orcPremium to update if the timestamp is greater than the latestIncreaseTime + minInterval
+        if (
+            block.timestamp >
+            premiumData.latestUpdateTime + premiumData.minInterval
+        ) {
+            // Check that _premium is not greater than the max increase percentage for orcPremium
+            if (
+                _premium <=
+                orcPremium +
+                    ((orcPremium * 1 ether) * premiumData.maxIncreasePercent) /
+                    100 /
+                    1 ether
+            ) {
+                orcPremium = _premium;
+                premiumData.latestUpdateTime = block.timestamp;
+            } else {
+                revert("ORC: Premium is greater than the max allowed increase");
+            }
+        } else {
+            revert("ORC: Premium update interval has not been reached");
+        }
     }
 
     function _setRoyaltyRecipient(address _to) internal virtual {
