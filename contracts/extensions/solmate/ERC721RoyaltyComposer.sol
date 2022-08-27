@@ -12,7 +12,7 @@ interface IORC {
 
     function isORC() external pure returns (bool);
 
-    function isServiceFiltered(address to) external view returns (bool);
+    function isAddressOrced(address to) external view returns (bool);
 }
 
 interface IERC20 {
@@ -58,7 +58,7 @@ abstract contract ERC721RoyaltyComposer is ERC721 {
     function _chargePremiumIfNeeded(address to) internal {
         // Nested if statements save gas
         if (orcPremium > 0) {
-            if (orc.isServiceFiltered(to)) {
+            if (orc.isAddressOrced(to)) {
                 if (!weth.transferFrom(msg.sender, to, orcPremium))
                     revert NotEnoughWethAllowanceForPremium(
                         weth.allowance(msg.sender, address(this)),
