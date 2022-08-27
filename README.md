@@ -18,9 +18,11 @@ The NFT owner must have approved the NFT contract to spend the `orcPremium` WETH
    * [Solmate ERC721](./contracts/extensions/solmate/ERC721RoyaltyComposer.sol)
    * [Openzeppelin ERC721](contracts/extensions/openzeppelin/ERC721RoyaltyComposer.sol)
 
-2. Integrate a method to set the `uint256 orcPremium` value. This is the amount of WETH (in wei) to charge the sender when their NFT is sent to a filtered address.
+2. Add the contract extension to your main contract and set the constructor arguments.
 
-3. **Optional (recommended)**: implement admin-only functions that call `_pauseFilter()` and `_unpauseFilter()` to disable/enable the address filter. The filter is enabled by default.
+3. **Optional:** If you want to adjust the premium, implement the `_setPremium` function in an external (owner-only) function. This function lets you update the premium but only after the constructor-configured interval has passed, and if the new amount is not greater than the constructor-configured increase percentage. This gives a guarantee to holders of the NFT that the premium amount cannot suddenly spike and will only change within preset boundaries.
+
+4. **Optional (recommended)**: implement admin-only functions that call `_pauseFilter()` and `_unpauseFilter()` to disable/enable the DAO-operated ORC address list. The list is enabled by default.
   
 ## Why?
 
