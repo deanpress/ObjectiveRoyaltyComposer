@@ -56,6 +56,7 @@ abstract contract ERC721RoyaltyComposer is ERC721 {
 
     // Adds a WETH charge to the sender if the receiver is a contract that bypasses royalties
     function _chargePremiumIfNeeded(address to) internal {
+        // Nested if statements save gas
         if (orcPremium > 0) {
             if (orc.isServiceFiltered(to)) {
                 if (!weth.transferFrom(msg.sender, to, orcPremium))
