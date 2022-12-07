@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-/// @title Objective Royalty Composer ERC721 Extension (solmate)
+/// @title Objective Royalty Composer ERC721 Extension (openzeppelin)
 /// @author Dean van Dugteren (https://github.com/deanpress)
 /// @notice Extends an ERC721 contract with the Objective Contracts Filter
 pragma solidity ^0.8.0;
